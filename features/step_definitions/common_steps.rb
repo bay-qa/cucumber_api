@@ -7,7 +7,7 @@ When(/^these parameters are supplied in URL:$/) do |table|
   @uri.query = URI.encode_www_form(table.rows_hash)
 end
 
-Then(/^the api call should (succeed|fail)$/) do |condition|
+Then(/^the api call should succeed$/) do
   case @method.downcase
     when 'get'
       method = Net::HTTP::Get
@@ -24,18 +24,4 @@ Then(/^the api call should (succeed|fail)$/) do |condition|
     @response = http.request request
   end
   puts @response.body
-
-  case condition
-    when 'succeed'
-      raise 'Request failed, expected success' if !@response.is_a?(Net::HTTPSuccess) || @response.body['Error']
-    when 'fail'
-      raise 'Request succeeded, expected failure' if @response.is_a?(Net::HTTPSuccess) && !@response.body['Error']
-  end
-end
-
-And(/^these response keys should have value:$/) do |table|
-  @parsed_response = JSON.parse(@response.body)
-  table.raw.each do |row|
-    expect(@parsed_response[row[0]]).to be == row[1]
-  end
 end
