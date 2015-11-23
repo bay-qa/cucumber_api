@@ -11,7 +11,7 @@ When(/^these parameters are supplied in URL:$/) do |table|
   @uri.query = URI.encode_www_form(table.rows_hash)
 end
 
-Then(/^the api call should (succeed|fail)$/) do | condition |
+Then(/^the api call should (succeed|fail)$/) do |condition|
   # picks which http verb to use bases on @method variable value
   case @method.downcase
     when 'get'
@@ -29,18 +29,21 @@ Then(/^the api call should (succeed|fail)$/) do | condition |
   Net::HTTP.start(@uri.host, @uri.port) do |http|
     # line 32 declared variable request and fire a call; see next line for flattened call
     # Net::HTTP::Get.new(http://api.bayqatraining.com/login?email=andrei9%40gmail.com&password=secret)
-    request   = method.new(@uri)
+    request = method.new(@uri)
     puts "Request method: #{@method.upcase}"
     puts "Request URI: #{@uri}"
 
+    # set request cookies to value from global variable if it's not nil
     if $cookies
       puts "Request cookies: #{$cookies}"
       request['Cookie'] = $cookies
     end
 
-    @response = http.request request
+    response_time = Benchmark.realtime { @response = http.request request }
     puts "Response status: #{@response.code} #{@response.message}"
+    puts "Response time: #{response_time}"
 
+    # save cookies from response in global variable
     if @response['Set-cookie']
       $cookies = @response['Set-cookie']
       puts "Response Cookies: #{$cookies}"
@@ -63,14 +66,12 @@ Then(/^the api call should (succeed|fail)$/) do | condition |
   end
 end
 
-
 And(/^these response keys should have value:$/) do |table|
   # Parse the JSON document _source_ into a Ruby HashMap data structure and return it
   # i.e table = {"id"=>108, "name"=>"Andrei", "email"=>"andrei9@gmail.com"}
   @parsed_response = JSON.parse(@response.body)
   table.raw.each do |row|
     # go through each row in table from feature file
-    # puts row
     # match that first row from server response is equal to first row from table in feature file
     # name"=>"Andrei" == "name", "Andrei"
     expect(@parsed_response[row[0]]).to be == row[1]
