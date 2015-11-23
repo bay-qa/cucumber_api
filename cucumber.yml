@@ -1,1 +1,1 @@
-default: -f pretty -f html -o report.html -f junit -o junit/ --no-source --color
+default: --tags ~@wip

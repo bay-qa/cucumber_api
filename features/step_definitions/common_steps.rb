@@ -30,9 +30,23 @@ Then(/^the api call should (succeed|fail)$/) do | condition |
     # line 32 declared variable request and fire a call; see next line for flattened call
     # Net::HTTP::Get.new(http://api.bayqatraining.com/login?email=andrei9%40gmail.com&password=secret)
     request   = method.new(@uri)
+    puts "Request method: #{@method.upcase}"
+    puts "Request URI: #{@uri}"
+
+    if $cookies
+      puts "Request cookies: #{$cookies}"
+      request['Cookie'] = $cookies
+    end
+
     @response = http.request request
+    puts "Response status: #{@response.code} #{@response.message}"
+
+    if @response['Set-cookie']
+      $cookies = @response['Set-cookie']
+      puts "Response Cookies: #{$cookies}"
+    end
   end
-  # puts @response.body
+  puts "Response body: #{@response.body}"
 
   # value of condition variable can be only succeed or failed which we specify in feature file
   case condition
@@ -56,7 +70,7 @@ And(/^these response keys should have value:$/) do |table|
   @parsed_response = JSON.parse(@response.body)
   table.raw.each do |row|
     # go through each row in table from feature file
-    puts row
+    # puts row
     # match that first row from server response is equal to first row from table in feature file
     # name"=>"Andrei" == "name", "Andrei"
     expect(@parsed_response[row[0]]).to be == row[1]
