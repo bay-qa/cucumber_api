@@ -1,6 +1,6 @@
-Feature: Negative scenarios for users API
+Feature: Negative scenarios for /users API
 
-  Scenario Outline: Create new user with invalid student details
+  Scenario Outline: Create new user with invalid user details
     Given a "POST" request is made to "/users"
     When these parameters are supplied in URL:
       | name     | <name>     |
@@ -10,12 +10,12 @@ Feature: Negative scenarios for users API
     And these response keys should have value:
       | Error | <error> |
     Examples:
-      | name           | email             | password | error                                           |
-      |                | andrei@nomail.com | secret   | Name can't be blank                             |
-      | Andrei Antipin |                   | secret   | Email can't be blank, Email is invalid          |
-      | Andrei Antipin | andrei@nomail.com |          | Password can't be blank                         |
-      | Andrei Antipin | andrei@gmail.com  | secret   | Email has already been taken                    |
-      | Andrei Antipin | andrei@nomail.com | sec      | Password is too short (minimum is 6 characters) |
+      | name           | email              | password | error                                           |
+      |                | andrei@nomail.com  | secret   | Name can't be blank                             |
+      | Andrei Antipin |                    | secret   | Email can't be blank, Email is invalid          |
+      | Andrei Antipin | andrei@nomail.com  |          | Password can't be blank                         |
+      | Andrei Antipin | andrei@hotmail.com | secret   | Email has already been taken                    |
+      | Andrei Antipin | andrei@nomail.com  | sec      | Password is too short (minimum is 6 characters) |
 
     # Email address validation scenarios
     Examples:
@@ -40,6 +40,12 @@ Feature: Negative scenarios for users API
     And these response keys should have value:
       | Error | Invalid email/password combination |
 
+  Scenario: Logout user
+    Given a "DELETE" request is made to "/logout"
+    Then the api call should succeed
+    And these response keys should have value:
+      | Success | Logged out |
+
   Scenario: Get user details without valid authentication (user is not logged in)
     Given a "GET" request is made to "/users/100"
     Then the api call should fail
@@ -55,12 +61,9 @@ Feature: Negative scenarios for users API
   Scenario: Get user without valid authorization (user is logged in, but trying to access another account)
     Given a "POST" request is made to "/login"
     When these parameters are supplied in URL:
-      | email    | andrei@gmail.com |
-      | password | secret           |
+      | email    | andrei@hotmail.com |
+      | password | secret             |
     Then the api call should succeed
-    And these response keys should have value:
-      | name  | Andrei Antipin   |
-      | email | andrei@gmail.com |
     Given a "GET" request is made to "/users/100"
     Then the api call should fail
     And these response keys should have value:
@@ -69,12 +72,9 @@ Feature: Negative scenarios for users API
   Scenario: Delete user without valid authorization (user is logged in, but trying to delete another account)
     Given a "POST" request is made to "/login"
     When these parameters are supplied in URL:
-      | email    | andrei@gmail.com |
-      | password | secret           |
+      | email    | andrei@hotmail.com |
+      | password | secret             |
     Then the api call should succeed
-    And these response keys should have value:
-      | name  | Andrei Antipin   |
-      | email | andrei@gmail.com |
     Given a "DELETE" request is made to "/users/100"
     Then the api call should fail
     And these response keys should have value:

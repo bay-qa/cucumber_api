@@ -1,1 +1,1 @@
-default: --tags ~@wip
+default: -f html -o reports/report.html -f junit -o reports/ -t ~@wip
