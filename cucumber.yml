@@ -1,1 +1,1 @@
-default: -f html -o reports/report.html -f junit -o reports/ -t ~@wip
+default: -r features -f pretty -f html -o reports/report.html -f junit -o reports/ -t ~@wip
